@@ -4,21 +4,19 @@ const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
 
-const app = express(); // ✅ Must be declared before use
+const app = express();
 app.use(cors());
 
-// ✅ Serve images statically from C:/flutter_uploads
-const imagePath = path.join('C:/flutter_uploads');
+// Use relative path for uploads
+const imagePath = path.join(__dirname, 'uploads');
 app.use('/images', express.static(imagePath));
 
-// ✅ Configure multer for file uploads
 const upload = multer({
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
       const folder = req.body.folder || 'other';
-      const dir = path.join('C:/flutter_uploads', folder);
+      const dir = path.join(imagePath, folder);
 
-      // Create folder if not exists
       fs.mkdirSync(dir, { recursive: true });
 
       cb(null, dir);
@@ -31,13 +29,11 @@ const upload = multer({
   }),
 });
 
-// ✅ Handle file upload via POST
 app.post('/upload', upload.single('file'), (req, res) => {
-  res.send('✅ File uploaded to FTP server successfully!');
+  res.send('✅ File uploaded successfully!');
 });
 
-// ✅ Start server
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
